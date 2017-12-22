@@ -1,0 +1,98 @@
+<definitions
+	xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+	xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsp1_2="http://schemas.xmlsoap.org/ws/2004/09/policy"
+	xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:tns="http://security.ws.java.com/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://security.ws.java.com/"
+	xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy" xmlns:sc="http://schemas.sun.com/2006/03/wss/client"
+	xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy" name="WSSecurityService">
+	<types>
+		<xsd:schema>
+			<xsd:import namespace="http://security.ws.java.com/"
+				schemaLocation="https://127.0.0.1:8443/WSWebSecurity/securehello?xsd=1" />
+		</xsd:schema>
+	</types>
+	<message name="secureHello">
+		<part name="parameters" element="tns:secureHello" />
+	</message>
+	<message name="secureHelloResponse">
+		<part name="parameters" element="tns:secureHelloResponse" />
+	</message>
+	<portType name="WSSecurity">
+		<operation name="secureHello">
+			<input wsam:Action="http://security.ws.java.com/WSSecurity/secureHelloRequest"
+				message="tns:secureHello" />
+			<output wsam:Action="http://security.ws.java.com/WSSecurity/secureHelloResponse"
+				message="tns:secureHelloResponse" />
+		</operation>
+	</portType>
+	<binding name="WSSecurityPortBinding" type="tns:WSSecurity">
+		<wsp1_2:PolicyReference URI="#MyWebServicePortBindingPolicy" />
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"
+			style="document" />
+		<operation name="secureHello">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+	</binding>
+	<service name="WSSecurityService">
+		<port name="WSSecurityPort" binding="tns:WSSecurityPortBinding">
+			<soap:address location="https://127.0.0.1:8443/WSWebSecurity/securehello" />
+		</port>
+	</service>
+	<wsp1_2:Policy wsu:Id="MyWebServicePortBindingPolicy" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+		<wsp:ExactlyOne>
+			<wsp1_2:All>
+				<sp:AsymmetricBinding xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+					<wsp1_2:Policy>
+						<sp:InitiatorToken>
+							<wsp:Policy>
+								<sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToRecipient">
+									<wsp:Policy>
+										<sp:WssX509V3Token10 />
+									</wsp:Policy>
+								</sp:X509Token>
+							</wsp:Policy>
+						</sp:InitiatorToken>
+						<sp:RecipientToken>
+							<wsp:Policy>
+								<sp:X509Token sp:IncludeToken="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy/IncludeToken/AlwaysToInitiator">
+									<wsp1_2:Policy>
+										<sp:WssX509V3Token10 />
+									</wsp1_2:Policy>
+								</sp:X509Token>
+							</wsp:Policy>
+						</sp:RecipientToken>
+						<sp:AlgorithmSuite>
+							<wsp:Policy>
+								<sp:TripleDesRsa15 />
+							</wsp:Policy>
+						</sp:AlgorithmSuite>
+						<sp:Layout>
+							<wsp:Policy>
+								<sp:Strict />
+							</wsp:Policy>
+						</sp:Layout>
+						<sp:IncludeTimestamp />
+						<sp:OnlySignEntireHeadersAndBody />
+					</wsp1_2:Policy>
+				</sp:AsymmetricBinding>
+				<sp:SignedParts xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+					<sp:Body />
+				</sp:SignedParts>
+				<sp:EncryptedParts xmlns:sp="http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702">
+					<sp:Body />
+				</sp:EncryptedParts>
+				<sc:KeyStore wspp:visibility="private" location="D:\tomcat\client-keystore.jks" type="JKS" storepass="changeit" alias="alice" />
+				<sc:TrustStore wspp:visibility="private" location="D:\tomcat\sts-truststore.jks" type="JKS" storepass="changeit" peeralias="bob" />
+			</wsp1_2:All>
+		</wsp:ExactlyOne>
+	</wsp1_2:Policy>
+	
+
+</definitions>
